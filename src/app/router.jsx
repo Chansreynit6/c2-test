@@ -3,6 +3,10 @@ import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/Home";
 import Products from "../pages/Products";
 import ProductDetail from "../pages/ProductDetail";
+import ProductNew from "../pages/ProductNew";
+import Users from "../pages/Users";
+import UserDetail from "../pages/UserDetail";
+import UserNew from "../pages/UserNew";
 import NotFound from "../pages/failures/NotFound";
 
 export const router = createBrowserRouter([
@@ -13,7 +17,11 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "products", element: <Products /> },
+      { path: "products/new", element: <ProductNew /> },
       { path: "products/:id", element: <ProductDetail /> },
+      { path: "users", element: <Users /> },
+      { path: "users/new", element: <UserNew /> },
+      { path: "users/:id", element: <UserDetail /> },
     ],
   },
 ]);

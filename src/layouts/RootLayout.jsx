@@ -12,7 +12,7 @@ export default function RootLayout() {
     <div className="min-h-dvh bg-white text-slate-900">
       <header className="border-b">
         <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-          <div className="font-semibold">C2 State Exam - Product Listing</div>
+          <div className="font-semibold">WMAD ONLINE</div>
 
           <nav className="flex gap-2">
             <NavLink to="/" end className={navClass}>
@@ -20,6 +20,9 @@ export default function RootLayout() {
             </NavLink>
             <NavLink to="/products" className={navClass}>
               Products
+            </NavLink>
+            <NavLink to="/users" className={navClass}>
+              Users
             </NavLink>
           </nav>
         </div>
