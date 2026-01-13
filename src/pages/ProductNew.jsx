@@ -1,27 +1,60 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function ProductNew() {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
 
-  function handleSubmit(e) {
+  // Fetch categories on mount
+  useEffect(() => {
+    fetch("https://api.escuelajs.co/api/v1/categories")
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  async function handleSubmit(e) {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
+    
+    // Generate a unique suffix to avoid slug conflicts
+    const uniqueSuffix = Math.random().toString(36).substring(2, 9);
 
     const newProduct = {
-      title: formData.get("title"),
+      title: `${formData.get("title")} ${uniqueSuffix}`,
       price: Number(formData.get("price")),
       categoryId: Number(formData.get("categoryId")),
-      image: formData.get("image"),
       description: formData.get("description"),
+      images: [formData.get("image")],
     };
 
-    console.log("New product:", newProduct);
+    try {
+      const res = await fetch("https://api.escuelajs.co/api/v1/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProduct),
+      });
 
-    // Later: POST to API
-    alert("Product submitted (mock)");
-
-    navigate("/products");
+      if (res.ok) {
+        const createdProduct = await res.json();
+        console.log("Created product:", createdProduct);
+        alert("✅ Successfully saved new product!");
+        navigate("/products", { 
+          state: { 
+            newProduct: createdProduct  // Pass the new product to display
+          } 
+        });
+      } else {
+        const error = await res.json();
+        alert(`❌ Failed: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❌ Failed to save new product!");
+    }
   }
 
   return (
@@ -59,19 +92,21 @@ export default function ProductNew() {
           />
         </div>
 
-        {/* Category ID (1–5 only) */}
+        {/* Category - Dropdown */}
         <div>
-          <label className="block text-sm font-medium">Category ID</label>
-          <input
+          <label className="block text-sm font-medium">Category</label>
+          <select
             name="categoryId"
-            type="number"
             required
-            min={1}
-            max={5}
             className="mt-1 w-full rounded-lg border px-3 py-2"
-            placeholder="1 - 5"
-          />
-          <p className="mt-1 text-xs text-slate-500">Allowed values: 1 to 5</p>
+          >
+            <option value="">Select a category</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Image URL */}

@@ -1,16 +1,13 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import products from "../assets/data/products.json";
 
 export default function Home() {
+  const [categories, setCategories] = useState([]);
   const items = products;
 
-  // Featured: first 4 items (simple + predictable for practice)
+  // Featured: first 4 items
   const featured = items.slice(0, 4);
-
-  // Categories: unique by category.id
-  const categories = Array.from(
-    new Map(items.map((p) => [p.category.id, p.category])).values()
-  );
 
   // Latest: sort by creationAt desc, take 4
   const latest = [...items]
@@ -19,6 +16,23 @@ export default function Home() {
         new Date(b.creationAt).getTime() - new Date(a.creationAt).getTime()
     )
     .slice(0, 4);
+
+  // Fetch categories dynamically
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(
+          "https://api.escuelajs.co/api/v1/categories?limit=4"
+        );
+        const data = await res.json();
+        setCategories(data); // save categories to state
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -57,35 +71,31 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="space-y-3 gap-4">
-            {featured.map((p) => (
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featured.slice(0, 3).map((p) => (
               <Link
                 key={p.id}
                 to={`/products/${p.id}`}
-                className="block rounded-2xl border bg-white p-4 hover:shadow-sm transition"
+                className="rounded-2xl border bg-white transition hover:shadow-sm"
               >
-                <div className="flex gap-3">
+                <div className="p-4">
                   <img
                     src={p.images?.[0] ?? "https://placehold.co/600x400"}
                     alt={p.title}
-                    className="h-20 w-20 shrink-0 rounded-xl object-cover"
                     loading="lazy"
+                    className="h-48 w-full rounded-xl object-cover"
                   />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate font-medium">{p.title}</div>
-                        <div className="truncate text-xs text-slate-600">
-                          {p.category?.name}
-                        </div>
-                      </div>
-                      <div className="shrink-0 font-semibold">${p.price}</div>
-                    </div>
+                </div>
 
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">
-                      {p.description}
-                    </p>
+                <div className="space-y-1 px-4 pb-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="truncate text-sm font-semibold">{p.title}</h3>
+                    <span className="shrink-0 text-sm font-bold">${p.price}</span>
                   </div>
+
+                  <p className="line-clamp-2 text-xs text-slate-600">
+                    {p.description}
+                  </p>
                 </div>
               </Link>
             ))}
